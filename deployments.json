@@ -1,0 +1,13 @@
+{
+  "baseSepolia": {
+    "chainId": 84532,
+    "mockUsd": "0x4f28870eEef439457CbE47d9cAE3a7E00f498F31",
+    "signalOracle": "0xAfa8f42bebc673421bc0C7f37ae9003C88bBA376",
+    "guardianVault": "0x38def65dF87fddbCCBC99F3472B335e14c7C9003",
+    "safeBucket": "0x58A918a2b7b929ABD0c38BB486AF872403CC5532"
+  },
+  "lasna": {
+    "chainId": 5318007,
+    "sentimentGuardian": "0xdbdf6F8CE41ab1B13cFe3C6Dc1230673E56FC6D8"
+  }
+}
