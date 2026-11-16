@@ -1,0 +1,105 @@
+SENTINEL — fork rehearsal (Base Sepolia fork :8545, Lasna fork :8546)
+deployer (anvil dev #0): 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+lasna fork balance: 100000000000000000000
+
+========================================================================
+STEP 1: Deploy SignalOracle + MockUSD on Base Sepolia (fork)
+========================================================================
+MockUSD:      0xC8a1c74401909D48b81288c0AAeB0ED166E5d941
+SignalOracle: 0x5bd6960D592fBFBc7ad919FF791B9baC2E4e456d
+
+========================================================================
+STEP 2: Deploy SentimentGuardian on Reactive Lasna (fork) — subscribes in constructor
+========================================================================
+SentimentGuardian: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+
+========================================================================
+STEP 3: Deploy GuardianVault on Base Sepolia (fork), wire guardian.setVault
+========================================================================
+GuardianVault: 0x924a67CB1886F58e435e10818222a96D9466e92E
+SafeBucket:    0xbDedA320BC856B34FAD656e5b0026918b10BA580
+setVault tx: 0xcf65d902e5d00ab2738d4866468fce860df2b76ef076b7273333bce8b350a49b
+
+========================================================================
+STEP 4: User deposits 1,000 mUSD
+========================================================================
+deposit tx: 0x04397acc1a956006fc540230ec46a74d5f011470ff685bed9e21efc9db715db3
+risky=1000000000 safe=0
+
+========================================================================
+STEP 5: AI agent scores a CRASH scenario and posts the signal on-chain
+========================================================================
+{
+  "score": -100,
+  "confidence": 100,
+  "features": {
+    "ret24_pct": -23.75,
+    "momentum_pct": -5.384,
+    "rsi": 7.32,
+    "daily_vol_pct": 6.806
+  },
+  "contributions": {
+    "ret24": -285.0,
+    "momentum": -96.92,
+    "rsi": -29.87,
+    "vol_drag": -25.0
+  },
+  "scenario": "crash",
+  "candles_used": 56
+}
+{"signal_tx": "0x74a4e1948ada46cad8f64984733269626bda7315430a55730462adaae96c8ba8"}
+
+SignalPosted log: block 59610265, tx 0x74a4e1948ada46cad8f64984733269626bda7315430a55730462adaae96c8ba8
+
+========================================================================
+STEP 6: Network leg: system contract delivers the log -> guardian.react() on Lasna
+========================================================================
+react tx (Lasna fork): 0x1882389f561d9f1af8ef15d47b1826fd95b6457066bb589b2691a611fe37190e
+guardian.protectionActive = true
+guardian.callbacksSent    = 1
+guardian.lastScore        = -100
+
+========================================================================
+STEP 7: Network leg: callback proxy delivers onRiskAlert -> vault on Base Sepolia
+========================================================================
+callback tx (Base fork): 0xd94d1ea2740ce1c258659f69f5a99875092b6400e385ddc1dff7dc2676599999
+vault.protectionActive = true
+risky=0 safe=1000000000
+
+========================================================================
+STEP 8: AI agent scores a CALM scenario; loop runs in reverse
+========================================================================
+{
+  "score": 100,
+  "confidence": 100,
+  "features": {
+    "ret24_pct": 17.702,
+    "momentum_pct": 3.683,
+    "rsi": 93.49,
+    "daily_vol_pct": 5.446
+  },
+  "contributions": {
+    "ret24": 212.43,
+    "momentum": 66.3,
+    "rsi": 30.44,
+    "vol_drag": -23.57
+  },
+  "scenario": "calm",
+  "candles_used": 56
+}
+{"signal_tx": "0x4070f89e1d7e309735dfb7b4418f11bb6bd048e7067009233f22af62b47fffd3"}
+
+clear callback tx (Base fork): 0x61390da75a04ed76b6bc10676c4cd4e209f0b5bcfdbeefcb153d04f988c8d2bf
+vault.protectionActive = false
+risky=1000000000 safe=0
+
+========================================================================
+STEP DONE: Full loop proven on forks: signal -> react -> callback -> funds moved -> restored
+========================================================================
+{
+  "mockUsd": "0xC8a1c74401909D48b81288c0AAeB0ED166E5d941",
+  "signalOracle": "0x5bd6960D592fBFBc7ad919FF791B9baC2E4e456d",
+  "sentimentGuardian": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+  "guardianVault": "0x924a67CB1886F58e435e10818222a96D9466e92E",
+  "safeBucket": "0xbDedA320BC856B34FAD656e5b0026918b10BA580"
+}
